@@ -15,11 +15,11 @@ Spec artifacts live under `.specdev/specs/<feature-name>/` as `requirements.md`,
 | Rule file | Phase | Apply mode |
 | --- | --- | --- |
 | `rule-generator.mdc` | Bootstrap / meta | Intelligent + globs on `**/*.mdc` |
-| `core-sdd.mdc` | Foundation | Always apply (planned — BIL-52) |
-| `requirements-agent.mdc` | Requirements | Intelligent + `.specdev` globs (BIL-53) |
-| `design-agent.mdc` | Design | Intelligent + `.specdev` globs (BIL-54) |
-| `task-planner.mdc` | Tasks | Intelligent + `.specdev` globs (BIL-55) |
-| `verifier-agent.mdc` | Verification | Intelligent + tests/spec globs (BIL-57) |
+| `core-sdd.mdc` | Foundation | Always apply (BIL-59) |
+| `requirements-agent.mdc` | Requirements | Intelligent + `.specdev` globs (planned) |
+| `design-agent.mdc` | Design | Intelligent + `.specdev` globs (planned) |
+| `task-planner.mdc` | Tasks | Intelligent + `.specdev` globs (planned) |
+| `verifier-agent.mdc` | Verification | Intelligent + tests/spec globs (planned) |
 
 ## Bootstrap: rule generator
 
