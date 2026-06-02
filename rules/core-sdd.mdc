@@ -1,0 +1,95 @@
+---
+description: Core Spec-Driven Development principles for every session
+alwaysApply: true
+---
+
+# SpecDev Core SDD Principles
+
+These principles apply to **every** Agent session in a SpecDev-enabled project. They are non-negotiable guardrails for Spec-Driven Development (SDD), inspired by Kiro.
+
+## Spec artifacts are the source of truth
+
+Before implementing or changing behavior, you MUST locate and read the current spec for the feature under work:
+
+```text
+.specdev/specs/<feature-name>/
+  requirements.md
+  design.md
+  tasks.md
+```
+
+- `<feature-name>` is **kebab-case** (e.g. `user-authentication`).
+- If the user names a feature, resolve its folder under `.specdev/specs/`.
+- If multiple features exist and the target is unclear, ask once which feature applies.
+- If no spec exists and the user wants SDD, offer to start the **requirements** phase before writing code.
+
+You MUST treat the **latest on-disk content** of these files as authoritative — not chat history or assumptions from earlier turns.
+
+## Phase progression (strict order)
+
+Do not skip phases. Do not implement from a prompt alone when SpecDev specs are in scope.
+
+| Order | Phase | Artifact | Gate |
+| --- | --- | --- | --- |
+| 1 | Requirements | `requirements.md` | User approves requirements before design |
+| 2 | Architecture & design | `design.md` | User approves design before task breakdown |
+| 3 | Task planning | `tasks.md` | User approves tasks before implementation |
+| 4 | Implementation | code/tests | One task at a time; mark `[x]` only after user confirms |
+| 5 | Verification | tests/properties | Map back to EARS criteria in `requirements.md` |
+
+- **MUST NOT** write or edit `design.md` until `requirements.md` is approved for that feature.
+- **MUST NOT** write or edit `tasks.md` until `design.md` is approved.
+- **MUST NOT** implement tasks until `tasks.md` exists and the user selects a task (or explicitly overrides SDD for a spike).
+
+When the user explicitly says to skip SDD (spike, prototype, emergency fix), note that override once and proceed — do not silently abandon specs.
+
+## Requirements: EARS notation (strict)
+
+All acceptance criteria in `requirements.md` MUST use **EARS** (Easy Approach to Requirements Syntax):
+
+| Pattern | Form |
+| --- | --- |
+| Ubiquitous | THE `<system>` SHALL `<response>` |
+| Event-driven | WHEN `<trigger>` THE `<system>` SHALL `<response>` |
+| State-driven | WHILE `<state>` THE `<system>` SHALL `<response>` |
+| Optional | WHERE `<feature>` THE `<system>` SHALL `<response>` |
+| Unwanted | IF `<condition>` THEN THE `<system>` SHALL `<response>` |
+
+Each requirement SHOULD include a user story: `As a [role], I want [feature], so that [benefit]`.
+
+- **MUST NOT** replace EARS with vague bullets (“handle errors well”, “be secure”).
+- **MUST** number criteria so they can be traced in design, tasks, and tests.
+
+## Code and specs stay in sync
+
+- **MUST NOT** change production code behavior without updating the relevant spec when that behavior is covered by `requirements.md`, `design.md`, or `tasks.md`.
+- When implementation diverges from an approved spec, **stop** and either update the spec with user approval or revert the code change.
+- **MUST** reference requirement or task IDs/numbers in commit messages or PR descriptions when working on a specced feature (when the user uses git/PRs).
+
+## Task execution discipline
+
+When `tasks.md` exists:
+
+- Execute **one** task at a time unless the user asks for a batch.
+- **MUST** read `requirements.md` and `design.md` before implementing a task.
+- **MUST NOT** auto-continue to the next checkbox after finishing a task — wait for user review.
+- Mark a task `[x]` only after the user confirms completion or acceptance criteria are met.
+
+## Verification
+
+Before calling work “done” on a specced feature:
+
+- Trace changes to EARS criteria in `requirements.md`.
+- Prefer **property-based** or example tests that encode acceptance criteria where feasible (see `verifier-agent` when present).
+- **MUST NOT** claim full completion if open tasks remain in `tasks.md` unless the user explicitly descopes them.
+
+## Interaction with other SpecDev rules
+
+- **Phase agents** (`requirements-agent`, `design-agent`, `task-planner`, `verifier-agent`) add detail for their phase; this rule always applies.
+- **`rule-generator`** governs authoring `.mdc` files — not feature specs.
+- On conflict, **phase progression and spec truth** win over speed or convenience.
+
+## References
+
+- `@AGENTS.md` — agent map
+- `@.cursor/rules/rule-generator.mdc` — rule authoring
