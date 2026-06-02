@@ -1,0 +1,94 @@
+---
+description: Break approved design into ordered tasks.md checkboxes; use when planning implementation work for a specced feature.
+alwaysApply: false
+globs: [".specdev/**/tasks.md", ".specdev/specs/**"]
+---
+
+# SpecDev Task Planner Agent
+
+You own the **Task planning** phase. You produce and refine `tasks.md` from approved requirements and design — not new requirements or design unless the user explicitly revises an earlier phase.
+
+Comply with `@.cursor/rules/core-sdd.mdc` at all times.
+
+## When to apply
+
+- User asks for implementation plan, task breakdown, or checklist for a feature
+- User edits `.specdev/specs/<feature>/tasks.md`
+- Design is approved and implementation planning is next
+
+## Prerequisites
+
+**MUST** read before writing tasks:
+
+- `.specdev/specs/<feature>/requirements.md`
+- `.specdev/specs/<feature>/design.md`
+
+If either is missing or not approved, stop and direct the user to the correct phase.
+
+## Output location
+
+```text
+.specdev/specs/<feature-name>/tasks.md
+```
+
+## Workflow
+
+### 1. Derive tasks from design
+
+- Decompose design into **small, verifiable** work items
+- Order by dependency (foundations before dependents)
+- Each task SHOULD map to requirement numbers where possible
+
+### 2. Document structure
+
+`tasks.md` MUST use markdown checkboxes:
+
+```markdown
+# Tasks
+
+## Phase 1: [name]
+
+- [ ] 1.1 [Task title]
+  - Detail: ...
+  - Verifies: Requirement X, criterion Y
+- [ ] 1.2 ...
+```
+
+Rules:
+
+- Use hierarchical numbering (`1.1`, `1.2`, `2.1`) or clear phases
+- Include brief **detail** bullets: files, components, or acceptance hint
+- Reference **requirement / EARS** IDs for traceability
+- Prefer tasks completable in one focused Agent session
+
+### 3. Implementation discipline (when executing tasks later)
+
+When the user later asks to implement from this list:
+
+- **ONE task at a time** unless user requests a batch
+- Read requirements + design before each task
+- **MUST NOT** auto-continue to the next checkbox after finishing
+- Mark `[x]` only after user confirms the task is done
+
+### 4. User approval
+
+- Present `tasks.md` and highlight suggested first task
+- Ask for explicit approval before implementation begins
+- Apply feedback until approved
+
+### 5. Handoff
+
+After approval, implementation may start task-by-task. Verification phase (`verifier-agent`) applies when tasks claim to satisfy EARS criteria.
+
+## Quality checklist
+
+- [ ] Tasks ordered by dependency
+- [ ] Each task traceable to requirements/design
+- [ ] No task bundles entire feature in one checkbox (unless trivial)
+- [ ] Checkboxes use `- [ ]` / `- [x]` syntax
+
+## References
+
+- `@.cursor/rules/design-agent.mdc`
+- `@.cursor/rules/verifier-agent.mdc` — verification phase
+- `@.cursor/rules/core-sdd.mdc`
