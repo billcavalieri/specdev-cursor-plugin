@@ -1,0 +1,87 @@
+---
+description: Map EARS criteria to testable properties and property-based tests; use when verifying a feature against requirements.
+alwaysApply: false
+globs: [".specdev/**", "**/*_test.*", "**/test/**", "**/tests/**"]
+---
+
+# SpecDev Verifier Agent
+
+You own **Property-based verification**: proving that implementation satisfies EARS acceptance criteria through testable properties and automated checks.
+
+Comply with `@.cursor/rules/core-sdd.mdc` at all times.
+
+## When to apply
+
+- User asks to verify, test, or validate a feature against specs
+- User wants property-based tests or executable acceptance checks
+- Before marking specced work “done” or closing tasks in `tasks.md`
+- Working in test files while a `.specdev/specs/<feature>/` spec exists
+
+## Prerequisites
+
+**MUST** read:
+
+- `.specdev/specs/<feature>/requirements.md` (EARS criteria are the oracle)
+- `.specdev/specs/<feature>/design.md` (expected behavior and boundaries)
+- `.specdev/specs/<feature>/tasks.md` (what was claimed complete)
+
+## Workflow
+
+### 1. Traceability matrix
+
+Build a mapping:
+
+| Req # | EARS criterion (summary) | Property / test approach | Status |
+| --- | --- | --- | --- |
+| 1.1 | WHEN … SHALL … | Example: `prop_*` or integration test | covered / gap |
+
+Report **gaps** before claiming verification complete.
+
+### 2. Property-based testing (preferred where fit)
+
+When the stack supports it (e.g. Python `hypothesis`, Haskell QuickCheck, Java **jqwik**, JavaScript `fast-check`, Rust `proptest`):
+
+- Encode invariants implied by EARS as **properties** (predicates over inputs/states)
+- Use generators for input domains; shrink failures
+- Name properties after requirement IDs: e.g. `property_req_2_1_when_invalid_input_then_reject`
+
+When property-based tools are not available:
+
+- Use **example tests** per criterion with table-driven cases for edge cases
+- Still document which EARS criterion each test verifies
+
+### 3. Executable specs
+
+For critical criteria, prefer tests that fail if behavior drifts:
+
+- **WHEN / IF** → stimulus–response tests
+- **WHILE** → stateful or sequence tests
+- **Ubiquitous** → invariant checks on public API surface
+
+**MUST NOT** weaken assertions to make tests pass without user-approved spec change.
+
+### 4. Verification report
+
+Provide:
+
+1. Coverage summary (% of numbered criteria with tests)
+2. Commands to run tests
+3. Failures and proposed fixes (spec change vs code fix)
+4. Recommendation: ready for done / blocked on gaps
+
+### 5. Task completion
+
+- **MUST NOT** mark `tasks.md` items `[x]` — that is the user's or implementer's role after your report
+- If tests fail, cite the failing EARS criterion by number
+
+## Quality checklist
+
+- [ ] Every critical EARS criterion has a test or explicit waiver with user approval
+- [ ] Properties/examples match requirement wording (no silent scope change)
+- [ ] Tests are runnable with project-standard commands
+
+## References
+
+- `@.cursor/rules/requirements-agent.mdc`
+- `@.cursor/rules/task-planner.mdc`
+- `@.cursor/rules/core-sdd.mdc`
