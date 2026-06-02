@@ -14,5 +14,6 @@
     "requirements",
     "cursor-rules"
   ],
-  "rules": "rules/"
+  "rules": "rules/",
+  "commands": "commands/"
 }
