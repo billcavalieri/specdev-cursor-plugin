@@ -193,7 +193,7 @@ globs: [".specdev/**/tasks.md", ".specdev/specs/**"]
 ---
 ```
 
-Body MUST include: read requirements + design, one task at a time during implementation, mark `[x]` only when user confirms completion.
+Body MUST include: read requirements + design; append `## Task Dependency Graph` with `waves` JSON at end of every `tasks.md`; one task at a time during implementation; mark `[x]` only when user confirms completion.
 
 ### Template: `verifier-agent.mdc`
 

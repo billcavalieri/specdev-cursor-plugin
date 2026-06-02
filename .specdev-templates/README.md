@@ -8,7 +8,7 @@ This folder holds **feature specs** for Spec-Driven Development (SDD).
 specs/<feature-name>/
   requirements.md   # User stories + EARS acceptance criteria
   design.md         # Architecture, diagrams, technical decisions
-  tasks.md          # Ordered implementation checklist
+  tasks.md          # Ordered checklist + Task Dependency Graph (parallel waves)
 ```
 
 - `<feature-name>` uses **kebab-case** (e.g. `payment-checkout`).
