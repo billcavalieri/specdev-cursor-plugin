@@ -37,6 +37,16 @@ See [AGENTS.md](AGENTS.md) for orchestration and agent rules.
 2. Confirm **Rules** and **Commands** in **Settings → Rules, Commands**.
 3. In your project: `/sdd-init`, then `/sdd-plan <feature idea>`.
 
+### Test locally
+
+Copy into `~/.cursor/plugins/local/` (Cursor does not load symlinks to paths outside that folder):
+
+```bash
+./scripts/sync-local-plugin.sh
+```
+
+Then **Developer: Reload Window** and check **Settings → Plugins**.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
