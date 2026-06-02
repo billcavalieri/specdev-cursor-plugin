@@ -1,16 +1,42 @@
 # SpecDev Cursor Plugin — Agent Overview
 
-Cursor rules (`.mdc`) for **Spec-Driven Development (SDD)** inspired by Kiro.
+Cursor rules (`.mdc`) and slash **commands** for **Spec-Driven Development (SDD)** inspired by Kiro.
 
 ## Phased workflow
 
 ```text
-Requirements (EARS) → Architecture & design → Task planning → Property-based verification
+Requirements (EARS) → Architecture & design → Task planning → Implementation → Verification
 ```
 
 Spec artifacts: `.specdev/specs/<feature-name>/` → `requirements.md`, `design.md`, `tasks.md`.
 
-## Agents (rules)
+```mermaid
+flowchart LR
+  spec["/spec"] --> design["/design"]
+  design --> tasks["/tasks"]
+  tasks --> code["Implement"]
+  code --> verify["/verify"]
+  plan["/sdd-plan"] -.-> spec
+  plan -.-> design
+  plan -.-> tasks
+```
+
+## Slash commands
+
+Run in Cursor Agent chat. Shipped in `commands/` (plugin) and `.cursor/commands/` (this repo).
+
+| Command | Phase | Agent rule |
+| --- | --- | --- |
+| `/sdd-init` | Setup | Scaffold `.specdev/specs/` |
+| `/sdd-plan <idea>` | Orchestrator | Full workflow with approval gates |
+| `/spec <idea>` | Requirements | `requirements-agent.mdc` |
+| `/design <feature>` | Design | `design-agent.mdc` |
+| `/tasks <feature>` | Tasks | `task-planner.mdc` |
+| `/verify <feature>` | Verification | `verifier-agent.mdc` |
+
+**Typical flow:** `/sdd-init` → `/sdd-plan my feature` *or* `/spec` → `/design` → `/tasks` → implement one task at a time → `/verify`.
+
+## Rules (agents)
 
 | Rule file | Phase | Apply mode |
 | --- | --- | --- |
@@ -21,6 +47,18 @@ Spec artifacts: `.specdev/specs/<feature-name>/` → `requirements.md`, `design.
 | `task-planner.mdc` | Tasks | Intelligent + `.specdev` globs |
 | `verifier-agent.mdc` | Verification | Intelligent + `.specdev` / test globs |
 
+## Repository layout (plugin)
+
+| Path | Purpose |
+| --- | --- |
+| `rules/` | Shipped rules (`.cursor-plugin/plugin.json`) |
+| `commands/` | Shipped slash commands |
+| `.cursor/rules/` | Dogfood rules (keep in sync with `rules/`) |
+| `.cursor/commands/` | Dogfood commands (keep in sync with `commands/`) |
+| `.specdev-templates/` | Copied into workspace by `/sdd-init` |
+
+When editing plugin commands or rules, update **both** shipped and `.cursor/` copies.
+
 ## Phase 1 — Foundation
 
 - **`core-sdd.mdc`** — spec truth, EARS, phase gates, spec–code sync
@@ -28,23 +66,7 @@ Spec artifacts: `.specdev/specs/<feature-name>/` → `requirements.md`, `design.
 
 ## Phase 2 — Feature specs
 
-1. **`requirements-agent`** — draft `requirements.md` (EARS)
-2. **`design-agent`** — `design.md` + Mermaid (after requirements approved)
-3. **`task-planner`** — `tasks.md` checkboxes (after design approved)
-4. **`verifier-agent`** — properties/tests traced to EARS criteria
-
-## Paths in this repo
-
-| Path | Purpose |
-| --- | --- |
-| `.cursor/rules/` | Active while developing this plugin |
-| `rules/` | Shipped via `.cursor-plugin/plugin.json` |
-
-Keep both directories identical when editing plugin rules.
-
-## Orchestration (planned)
-
-Slash commands (`/sdd-plan`, `/spec`, etc.) — future work.
+Use slash commands or @-mention phase agents directly.
 
 ## License
 
