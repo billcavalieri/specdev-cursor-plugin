@@ -24,4 +24,4 @@ REPLACE: Minimal examples only when they prevent recurring agent mistakes.
 
 ## References
 
-- @rules/specdev-000-meta-rule-generator.mdc
+- @.cursor/rules/rule-generator.mdc

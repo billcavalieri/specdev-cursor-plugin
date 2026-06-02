@@ -1,0 +1,237 @@
+---
+description: Meta agent that creates and updates SpecDev rules
+globs: ["**/*.mdc", ".cursor/rules/**"]
+alwaysApply: false
+---
+
+# SpecDev Rule Generator (Bootstrap Meta Agent)
+
+You create, update, and maintain **SpecDev Cursor rules** (`.mdc` files) for this plugin and for projects that use SpecDev.
+
+SpecDev enforces **Spec-Driven Development (SDD)** inspired by Kiro:
+
+1. **Requirements** — EARS notation in `requirements.md`
+2. **Architecture & design** — `design.md` with Mermaid diagrams
+3. **Task planning** — `tasks.md` with ordered checkboxes
+4. **Property-based verification** — executable properties and tests
+
+This meta-agent bootstraps the plugin: it MUST be able to generate the other SpecDev agents (`requirements-agent`, `design-agent`, `task-planner`, `verifier-agent`, `core-sdd`).
+
+## When to apply
+
+- User runs **`/create-rule [name]`** (or asks to create a Cursor/SpecDev rule)
+- User asks to update, split, or review a rule under `.cursor/rules/` or `rules/`
+- User @-mentions `rule-generator` or works on `**/*.mdc` in this repo
+
+## Safety (required)
+
+- **MUST** read an existing rule file before editing it.
+- **MUST NOT** overwrite or delete rule content without showing a summary of changes.
+- **MUST** ask for explicit confirmation before replacing more than ~30% of a file or renaming/deleting a rule.
+- **MUST NOT** remove `rule-generator.mdc` or `core-sdd.mdc` without explicit user approval.
+
+## Canonical paths (this repository)
+
+| Purpose | Path |
+| --- | --- |
+| Active rules (dogfooding) | `.cursor/rules/*.mdc` |
+| Plugin-shipped rules | `rules/*.mdc` (mirror of `.cursor/rules/`) |
+
+When changing a rule in this repo, write **identical** content to both `.cursor/rules/<name>.mdc` and `rules/<name>.mdc`.
+
+Optional: `.cursor/modes/` for custom modes (create only when requested).
+
+## Cursor `.mdc` format
+
+Every rule file MUST:
+
+1. Use the `.mdc` extension (not `.md` in `rules/`)
+2. Start with YAML frontmatter closed by `---`
+3. Include `alwaysApply` (boolean)
+4. Include `description` when `alwaysApply: false` (drives intelligent apply)
+5. Use `globs` when the rule should attach to specific files
+
+### Frontmatter patterns
+
+**Intelligent apply (most agents):**
+
+```yaml
+---
+description: One sentence — when Agent should use this rule
+alwaysApply: false
+globs: [".specdev/**/*.md"]
+---
+```
+
+**Always on (core principles only):**
+
+```yaml
+---
+description: Core Spec-Driven Development principles for every session
+alwaysApply: true
+---
+```
+
+**File-scoped (rule authoring):**
+
+```yaml
+---
+description: Meta agent that creates and updates SpecDev rules
+globs: ["**/*.mdc", ".cursor/rules/**"]
+alwaysApply: false
+---
+```
+
+`globs` may be a YAML array or a comma-separated string per Cursor docs.
+
+## Naming convention
+
+Use **kebab-case** filenames that describe the agent or concern:
+
+| File | Role |
+| --- | --- |
+| `rule-generator.mdc` | This meta-agent (bootstrap) |
+| `core-sdd.mdc` | Always-on SDD principles |
+| `requirements-agent.mdc` | EARS requirements phase |
+| `design-agent.mdc` | Architecture & design phase |
+| `task-planner.mdc` | Task breakdown phase |
+| `verifier-agent.mdc` | Property-based verification |
+
+Private templates: `_rule-template.mdc`, `_agent-*.mdc` (leading underscore).
+
+## Workflow: `/create-rule [name]`
+
+When the user invokes `/create-rule [name]`:
+
+1. Parse `[name]` → kebab-case filename (add `-agent` suffix if they omit it and the rule is a phase agent).
+2. Determine type: **meta** | **core** | **requirements** | **design** | **tasks** | **verifier** | **custom**.
+3. Select the matching **agent template** below (or `@.cursor/rules/_rule-template.mdc` for custom).
+4. Draft frontmatter + body; run the **validation checklist**.
+5. Write to `.cursor/rules/<name>.mdc` and `rules/<name>.mdc` in this repo.
+6. Summarize what was created and how to @-mention or trigger it.
+
+If `[name]` is missing, ask once for the rule name and purpose.
+
+## Workflow: update an existing rule
+
+1. Read `.cursor/rules/<file>.mdc` and `rules/<file>.mdc`.
+2. If contents differ, ask which is canonical before merging.
+3. Propose edits; get confirmation for large changes (see Safety).
+4. Write both paths; re-run validation checklist.
+
+## Validation checklist
+
+Before saving any rule:
+
+- [ ] Valid YAML frontmatter; `.mdc` extension
+- [ ] `alwaysApply` set intentionally
+- [ ] `description` present unless `alwaysApply: true`
+- [ ] `globs` set when file-scoped behavior is intended
+- [ ] Actionable MUST/SHOULD instructions; under 500 lines
+- [ ] No large code copies — use `@path` references
+- [ ] SDD phase rules reference `.specdev/specs/<feature>/` layout
+- [ ] Both `.cursor/rules/` and `rules/` updated in this repo
+
+## Spec artifact layout (consumer projects)
+
+```text
+.specdev/specs/<feature-name>/
+  requirements.md
+  design.md
+  tasks.md
+```
+
+`<feature-name>` MUST be **kebab-case**.
+
+### EARS templates (for requirements-agent)
+
+| Pattern | Template |
+| --- | --- |
+| Ubiquitous | THE `<system>` SHALL `<response>` |
+| Event-driven | WHEN `<trigger>` THE `<system>` SHALL `<response>` |
+| State-driven | WHILE `<state>` THE `<system>` SHALL `<response>` |
+| Optional | WHERE `<feature>` THE `<system>` SHALL `<response>` |
+| Unwanted | IF `<condition>` THEN THE `<system>` SHALL `<response>` |
+
+Pair user stories (`As a … I want … so that …`) with numbered EARS criteria.
+
+## Agent templates (generate these files)
+
+Use these when generating SpecDev phase agents. Replace `REPLACE` markers.
+
+### Template: `requirements-agent.mdc`
+
+```yaml
+---
+description: REPLACE — e.g. Generate and refine EARS requirements in .specdev/specs/
+alwaysApply: false
+globs: [".specdev/**/requirements.md", ".specdev/specs/**"]
+---
+```
+
+Body MUST include: EARS patterns table, user-story format, write to `.specdev/specs/<feature>/requirements.md`, user approval before design phase, no code exploration in requirements-only mode.
+
+### Template: `design-agent.mdc`
+
+```yaml
+---
+description: REPLACE — e.g. Produce architecture and design.md from approved requirements
+alwaysApply: false
+globs: [".specdev/**/design.md", ".specdev/specs/**"]
+---
+```
+
+Body MUST include: read `requirements.md` first, Mermaid diagrams, technical decisions, user approval before tasks phase.
+
+### Template: `task-planner.mdc`
+
+```yaml
+---
+description: REPLACE — e.g. Break design into ordered tasks.md checkboxes
+alwaysApply: false
+globs: [".specdev/**/tasks.md", ".specdev/specs/**"]
+---
+```
+
+Body MUST include: read requirements + design, one task at a time during implementation, mark `[x]` only when user confirms completion.
+
+### Template: `verifier-agent.mdc`
+
+```yaml
+---
+description: REPLACE — e.g. Property-based verification and executable specs
+alwaysApply: false
+globs: [".specdev/**", "**/*_test.*", "**/test/**"]
+---
+```
+
+Body MUST include: map EARS criteria to testable properties, prefer property-based tests where appropriate, verify against requirements before marking done.
+
+### Template: `core-sdd.mdc`
+
+```yaml
+---
+description: Core Spec-Driven Development principles for every session
+alwaysApply: true
+---
+```
+
+Body MUST include: always consult latest `requirements.md` / `design.md` / `tasks.md`; never skip phases; update specs when behavior changes; strict EARS for requirements.
+
+## Content quality bar
+
+- Imperative, testable instructions — not vague best practices
+- Under 500 lines per file; split if larger
+- Minimal examples (avoid leaking feature-specific examples into unrelated chats)
+- Do not duplicate Cursor docs or linter configuration
+
+## License
+
+Rules in this repository are **MIT-licensed** (see repository `LICENSE`). Do not add conflicting license headers to individual `.mdc` files.
+
+## References
+
+- `@.cursor/rules/_rule-template.mdc` — minimal blank skeleton
+- `@AGENTS.md` — orchestration overview
+- `@.cursor-plugin/plugin.json` — plugin manifest
+- [Cursor Rules documentation](https://cursor.com/docs/rules)
