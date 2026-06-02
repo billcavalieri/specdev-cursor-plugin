@@ -1,0 +1,184 @@
+---
+description: >-
+  Bootstrap meta-rule for the SpecDev plugin. Use when creating, updating, or
+  reviewing any SpecDev Cursor rule (.mdc), scaffolding plugin rules, or
+  validating rule frontmatter and naming for the phased SDD workflow.
+alwaysApply: false
+---
+
+# SpecDev Meta Rule Generator (Bootstrap)
+
+You maintain and generate **SpecDev Cursor project rules** for this plugin repository and for consumer projects that install SpecDev.
+
+SpecDev implements **Spec-Driven Development (SDD)** inspired by Kiro, in four phases:
+
+1. **Requirements** — user stories + acceptance criteria in **EARS** notation
+2. **Architecture & design** — technical design with diagrams
+3. **Task planning** — ordered, checkable implementation tasks
+4. **Property-based verification** — testable properties and validation
+
+This meta-rule is the **bootstrap**: every other SpecDev rule MUST conform to the standards below.
+
+## When this rule applies
+
+Apply this rule when the user:
+
+- Asks to create, update, split, or review a Cursor rule for SpecDev
+- Uses `/create-rule` for SpecDev or SDD workflow rules
+- Works on files under `rules/` or `.cursor/rules/`
+- @-mentions this rule or `specdev-000-meta-rule-generator`
+
+## Canonical locations
+
+| Context | Path | Notes |
+| --- | --- | --- |
+| Plugin source (shipped) | `rules/*.mdc` | Discovered via `.cursor-plugin/plugin.json` |
+| Local dogfooding | `.cursor/rules/*.mdc` | MUST mirror `rules/` in this repo |
+
+When you add or change a rule in this repository, you MUST update **both** `rules/<filename>.mdc` and `.cursor/rules/<filename>.mdc` so they stay identical.
+
+## Naming convention
+
+Use kebab-case filenames with a numeric phase prefix:
+
+```text
+specdev-<phase>-<slug>.mdc
+```
+
+| Phase prefix | Phase | Example |
+| --- | --- | --- |
+| `000` | Bootstrap / meta | `specdev-000-meta-rule-generator.mdc` |
+| `100` | Requirements (EARS) | `specdev-100-requirements.mdc` |
+| `200` | Architecture & design | `specdev-200-design.mdc` |
+| `300` | Task planning | `specdev-300-tasks.mdc` |
+| `400` | Property-based verification | `specdev-400-verification.mdc` |
+
+- The slug MUST be short and descriptive.
+- Do NOT reuse phase numbers for unrelated rules.
+- Private templates use a leading underscore: `_rule-template.mdc`
+
+## Frontmatter (required)
+
+Every SpecDev rule MUST be a `.mdc` file with YAML frontmatter. Plain `.md` in `rules/` is invalid for this plugin.
+
+```yaml
+---
+description: >-
+  One clear sentence for Agent intelligent selection. State WHEN to use this rule.
+alwaysApply: false
+globs:
+---
+```
+
+### Field rules
+
+| Field | Required | Guidance |
+| --- | --- | --- |
+| `description` | Yes, unless `alwaysApply: true` | Drives intelligent apply; mention triggers and phase |
+| `alwaysApply` | Yes | `true` only for universal guardrails; default `false` |
+| `globs` | When file-scoped | Comma-separated patterns, e.g. `.specdev/**/*.md`, `rules/**/*.mdc` |
+
+### Application modes
+
+- **Always apply** — `alwaysApply: true` (omit `globs` and `description` is ignored)
+- **Intelligent apply** — `alwaysApply: false` + strong `description`
+- **File-scoped** — `alwaysApply: false` + `globs` matching spec artifacts
+- **Manual** — user @-mentions the rule; still include `description`
+
+## Content quality bar
+
+Generated and edited rules MUST be:
+
+1. **Actionable** — imperative instructions (MUST / SHOULD / MUST NOT), not vague advice
+2. **Scoped** — one primary concern per file; split when over ~300 lines
+3. **Under 500 lines** — split into composable rules if larger
+4. **Free of code dumps** — reference canonical files with `@path` instead of copying large blocks
+5. **Example-light** — minimal examples; avoid feature-specific examples that leak into unrelated tasks
+6. **SDD-aligned** — requirements rules reference EARS; task rules enforce one-task-at-a-time; verification rules demand testable properties
+
+Avoid: restating Cursor docs, listing every CLI command, duplicating linter config, or documenting rare edge cases.
+
+## Workflow: generate a new SpecDev rule
+
+When asked to create a rule, follow these steps in order:
+
+### 1. Clarify intent (brief)
+
+Confirm or infer:
+
+- **Phase** (000 / 100 / 200 / 300 / 400)
+- **Slug** (kebab-case)
+- **Application mode** (always / intelligent / globs / manual)
+- **Primary audience** (plugin authors vs feature spec authors)
+
+If the user already gave enough detail, do not ask redundant questions.
+
+### 2. Draft from template
+
+Start from `@rules/_rule-template.mdc`. Replace all `REPLACE` placeholders.
+
+### 3. Validate checklist
+
+Before writing files, verify:
+
+- [ ] Filename matches `specdev-<phase>-<slug>.mdc`
+- [ ] Valid YAML frontmatter; `.mdc` extension
+- [ ] `description` explains when Agent should attach the rule
+- [ ] Instructions are testable and phase-appropriate
+- [ ] No contradiction with `specdev-000-meta-rule-generator.mdc`
+- [ ] Line count under 500
+
+### 4. Write files
+
+Write to:
+
+- `rules/specdev-<phase>-<slug>.mdc`
+- `.cursor/rules/specdev-<phase>-<slug>.mdc` (identical content)
+
+### 5. Report to user
+
+Summarize: filename, phase, apply mode, and one-sentence purpose. Do not push or open a PR unless the user asks.
+
+## Workflow: update an existing rule
+
+1. Read the current `rules/<file>.mdc` and `.cursor/rules/<file>.mdc`; if they differ, ask which is canonical or merge carefully.
+2. Preserve the phase prefix and filename unless the user requests a rename.
+3. Apply edits to **both** paths.
+4. Re-run the validation checklist.
+
+## Spec artifact conventions (for downstream rules)
+
+Rules in phases 100–400 SHOULD assume this layout in consumer projects:
+
+```text
+.specdev/specs/<feature-name>/
+  requirements.md   # EARS acceptance criteria
+  design.md         # architecture, Mermaid diagrams
+  tasks.md          # checkbox tasks, one at a time
+```
+
+Feature names MUST use **kebab-case** (e.g. `user-authentication`).
+
+### EARS patterns (for phase 100 rules)
+
+Teach and enforce these templates:
+
+| Pattern | Template |
+| --- | --- |
+| Ubiquitous | THE `<system>` SHALL `<response>` |
+| Event-driven | WHEN `<trigger>` THE `<system>` SHALL `<response>` |
+| State-driven | WHILE `<state>` THE `<system>` SHALL `<response>` |
+| Optional | WHERE `<feature>` THE `<system>` SHALL `<response>` |
+| Unwanted | IF `<condition>` THEN THE `<system>` SHALL `<response>` |
+
+Requirements docs MUST pair user stories (`As a … I want … so that …`) with numbered EARS criteria.
+
+## License
+
+Rules in this repository are part of the **MIT-licensed** SpecDev Cursor Plugin. Do not add proprietary or conflicting license headers to individual rule files.
+
+## Related files
+
+- `@rules/_rule-template.mdc` — blank rule skeleton
+- `@.cursor-plugin/plugin.json` — plugin manifest
+- `@README.md` — project overview

@@ -1,0 +1,27 @@
+---
+description: "REPLACE: One sentence for Agent rule selection — when this rule applies."
+alwaysApply: false
+globs:
+---
+
+# REPLACE: Rule title
+
+## Purpose
+
+REPLACE: What this rule enforces and which SpecDev phase it belongs to.
+
+## When to apply
+
+REPLACE: Triggers (user intent, files in context, workflow step).
+
+## Instructions
+
+REPLACE: Imperative, testable guidance. Prefer MUST / SHOULD / MUST NOT.
+
+## Examples
+
+REPLACE: Minimal examples only when they prevent recurring agent mistakes.
+
+## References
+
+- @rules/specdev-000-meta-rule-generator.mdc
